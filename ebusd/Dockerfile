@@ -29,8 +29,25 @@ RUN apt-get update \
       sqlite3 \
  && rm -rf /var/lib/apt/lists/*
 
-COPY --from=upstream /usr/bin/ebusd   /usr/bin/ebusd
 COPY --from=upstream /usr/bin/ebusctl /usr/bin/ebusctl
+
+# ebusd itself comes from the static release of aghulas/ebusd (runtime CRC for Weishaupt),
+# checked against the pinned SHA-256 of the binary for the architecture being built.
+ARG BUILD_ARCH
+ARG EBUSD_RELEASE=v26.1-weishaupt.1
+ARG EBUSD_SHA256_aarch64=51c46e51e278535880f5524fd8b766df76f5c1410eef44addeb236366974fe1f
+ARG EBUSD_SHA256_amd64=7f51afc908bb3c156d6d47950a09685fe3b3e95c4e51ff321baa0daf56591e6e
+RUN set -e; \
+    case "${BUILD_ARCH}" in \
+      aarch64) sha="${EBUSD_SHA256_aarch64}" ;; \
+      amd64) sha="${EBUSD_SHA256_amd64}" ;; \
+      *) echo "unsupported architecture ${BUILD_ARCH}"; exit 1 ;; \
+    esac; \
+    curl -fsSL -o /usr/bin/ebusd \
+      "https://github.com/aghulas/ebusd/releases/download/${EBUSD_RELEASE}/ebusd-${BUILD_ARCH}"; \
+    echo "${sha}  /usr/bin/ebusd" | sha256sum -c -; \
+    chmod 755 /usr/bin/ebusd; \
+    /usr/bin/ebusd --version
 COPY --from=upstream /etc/ebusd/      /etc/ebusd/
 COPY --from=ttyd-upstream /usr/bin/ttyd /usr/bin/ttyd
 
@@ -38,7 +55,7 @@ LABEL \
     Description="ebusd" \
     org.opencontainers.image.title="Home Assistant App: eBUSd" \
     org.opencontainers.image.description="Transparent wrapper of john30/ebusd — a daemon for communicating with eBUS devices (heating systems)" \
-    org.opencontainers.image.source="https://github.com/LukasGrebe/ha-addons" \
+    org.opencontainers.image.source="https://github.com/aghulas/ha-addons" \
     org.opencontainers.image.licenses="Apache License 2.0"
 
 COPY run.sh ebus_sqlite.py /
