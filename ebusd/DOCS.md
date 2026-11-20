@@ -1,8 +1,63 @@
-# Home Assistant App: eBUSd
+# Home Assistant App: eBUSd (Weishaupt CRC)
 
-> **This app is a transparent wrapper.** It packages the unmodified
-> [ebusd](https://ebusd.eu) binary from [john30/ebusd](https://github.com/john30/ebusd)
-> into a Home Assistant supervised container. Nothing more.
+<!-- Branch weishaupt of aghulas/ha-addons: this section and the places marked
+     "(this add-on)" below differ from the upstream text. Keep them when merging
+     an upstream release. -->
+
+## This add-on: what differs from the upstream eBUSd app
+
+This is the eBUSd app of [LukasGrebe/ha-addons](https://github.com/LukasGrebe/ha-addons)
+with one change: its `ebusd` binary is not the one of john30/ebusd but the ebusd build
+[v26.1-weishaupt.1](https://github.com/aghulas/ebusd/releases/tag/v26.1-weishaupt.1) of
+[aghulas/ebusd](https://github.com/aghulas/ebusd), checked against its pinned SHA-256.
+`ebusctl`, the files under `/etc/ebusd/` and the app's own scripts are the upstream ones.
+There is no prebuilt image: Supervisor builds the add-on on your device, so the first
+install takes a few minutes.
+
+What the build changes for you:
+
+- **Writes to Weishaupt controllers** (WTC boiler controls, Kromschröder WCM controllers).
+  Their register and memory messages carry a checksum that must be computed when the
+  telegram is sent; this build does it (john30/ebusd#1825, not merged yet). It applies only
+  to messages whose definition asks for it (attribute `wcrc` or the marker `[WCRC]`), i.e.
+  the Weishaupt definitions of
+  [aghulas/ebusd-configuration](https://github.com/aghulas/ebusd-configuration/releases).
+  Every other message is handled as by upstream ebusd.
+- **No HTTPS: local definitions only.** It is a static build with MQTT, without TLS and KNX.
+  It cannot load the online definitions: without a local `--configpath`, ebusd stops at
+  start with `invalid configPath URL (HTTPS not supported)`. See
+  [Custom message definitions](#custom-message-definitions).
+
+You need this add-on only to **write** settings with the Weishaupt definitions (with
+`ebusctl` or the Home Assistant integration
+[ha-weishaupt](https://github.com/aghulas/ha-weishaupt)). For reading, the stock eBUSd app
+is enough. Run one of them, not both: an adapter can only be used by one app at a time.
+
+To check which ebusd runs, `ebusctl info` (see [Using ebusctl](#using-ebusctl-interactive-shell)):
+its first line reads `version: ebusd 26.1.p20261029`.
+
+The repository has two addresses:
+
+- **For the add-on store** (⋮ → Repositories): `https://github.com/aghulas/ha-addons#weishaupt`.
+  The `#weishaupt` selects this branch; opened in a browser, the same address shows the
+  default branch, which is the upstream text.
+- **To read it in a browser**: [https://github.com/aghulas/ha-addons/tree/weishaupt](https://github.com/aghulas/ha-addons/tree/weishaupt).
+
+Added with exactly the store address above, the app config folder is
+`/addon_configs/09e0ce7c_ebusd/` on the host (see [App config folder](#app-config-folder)).
+
+**Support.** For this build, this add-on and the Weishaupt definitions, open an issue in
+[aghulas/weishaupt-ebus](https://github.com/aghulas/weishaupt-ebus/issues). Use the upstream
+places below only for what also happens with the stock eBUSd app or the official ebusd.
+
+**Updates.** This branch follows the upstream releases of the app. It has no testing channel
+of its own (see [Testing upcoming versions](#testing-upcoming-versions)).
+
+Unofficial, not affiliated with Weishaupt or Kromschröder.
+
+<!-- End of the section specific to this add-on. -->
+
+---
 
 **If something isn't working, the answer is almost always in the ebusd docs, not here.**
 Issues with device communication, CSV message definitions, MQTT entity values, bus
@@ -13,9 +68,10 @@ errors, or heating-system behaviour belong with the ebusd project:
 - [ebusd-configuration](https://github.com/john30/ebusd-configuration) — message CSV files
 - [ebusd discussions](https://github.com/john30/ebusd/discussions) — community support
 
-Open an issue in [this repository](https://github.com/LukasGrebe/ha-addons/issues) only
+Open an issue in [the upstream app's repository](https://github.com/LukasGrebe/ha-addons/issues) only
 for problems specific to running ebusd inside Home Assistant Supervisor (startup failures,
-HA integration, config folder access).
+HA integration, config folder access) that also occur with the stock eBUSd app; for this
+add-on, see [Support](#this-add-on-what-differs-from-the-upstream-ebusd-app) above (this add-on).
 
 ---
 
@@ -67,6 +123,9 @@ Common flags to add:
 | `--configlang=de` | Prefer German message definitions |
 | `--configpath=/config/` | Use local message definition files (see [Custom message definitions](#custom-message-definitions)) |
 | `--mqtttopic=myheating` | Override the default `ebusd` MQTT topic prefix |
+
+With this add-on, `--configpath=` to a local folder is required: its ebusd cannot load the
+online definitions (this add-on, see [above](#this-add-on-what-differs-from-the-upstream-ebusd-app)).
 
 Full flag reference: [ebusd wiki: Run](https://github.com/john30/ebusd/wiki/2.-Run)
 
@@ -160,25 +219,25 @@ auto-configured from the HA Mosquitto broker — remove them from your config en
 
 ## App config folder
 
-The app config folder is at `/addon_configs/2ad9b828_ebusd/` on the HA host and mounted at
+The app config folder is at `/addon_configs/09e0ce7c_ebusd/` on the HA host and mounted at
 `/config` inside the running container. It is included in HA backups.
 
-The prefix `2ad9b828` is derived from the repository URL as you added it
-(`https://github.com/LukasGrebe/ha-addons/`); a different spelling of the URL, or a
-[test version](#testing-upcoming-versions), gets a different prefix. If the folder
+The prefix `09e0ce7c` is derived from the repository URL as you added it
+(`https://github.com/aghulas/ha-addons#weishaupt`, this add-on); a different spelling of
+the URL gets a different prefix, and the stock eBUSd app has its own folder. If the folder
 does not exist, look into `/addon_configs/` for the `…_ebusd` folder.
 
 Access it via:
 
-- **Studio Code Server** (VS Code in browser addon) — full filesystem access, browse to `/addon_configs/2ad9b828_ebusd/`
-- **SSH** (Advanced SSH addon) — `cd /addon_configs/2ad9b828_ebusd/`
+- **Studio Code Server** (VS Code in browser addon) — full filesystem access, browse to `/addon_configs/09e0ce7c_ebusd/`
+- **SSH** (Advanced SSH addon) — `cd /addon_configs/09e0ce7c_ebusd/`
 - **Samba** — exposed as the `addon_configs` share
 
 
 | Host path | Container path | Purpose |
 |---|---|---|
-| `/addon_configs/2ad9b828_ebusd/mqtt-hassio.cfg` | `/config/mqtt-hassio.cfg` | MQTT integration config (seeded on first start when **Seed HA MQTT integration config** is enabled) |
-| `/addon_configs/2ad9b828_ebusd/` | `/config/` | Local message definition CSV files |
+| `/addon_configs/09e0ce7c_ebusd/mqtt-hassio.cfg` | `/config/mqtt-hassio.cfg` | MQTT integration config (seeded on first start when **Seed HA MQTT integration config** is enabled) |
+| `/addon_configs/09e0ce7c_ebusd/` | `/config/` | Local message definition CSV files |
 
 ## Migrating config folder from version 25.1 or older
 
@@ -188,8 +247,8 @@ files) need to be copied to the new location.
 
 | Old path (≤25.1) | New path (≥26.1) |
 |---|---|
-| `/config/mqtt-hassio.cfg` | `/addon_configs/2ad9b828_ebusd/mqtt-hassio.cfg` |
-| `/config/ebusd-configuration/` | `/addon_configs/2ad9b828_ebusd/` |
+| `/config/mqtt-hassio.cfg` | `/addon_configs/09e0ce7c_ebusd/mqtt-hassio.cfg` |
+| `/config/ebusd-configuration/` | `/addon_configs/09e0ce7c_ebusd/` |
 
 Copy your files via SSH or Studio Code Server. The `mqtt-hassio.cfg` is seeded
 automatically on first start if it doesn't exist yet — you only need to copy it if you
@@ -219,10 +278,18 @@ ebusctl find -d -r
 ### Via SSH (alternative)
 
 Requires the [Advanced SSH & Web Terminal](https://github.com/hassio-addons/addon-ssh)
-addon with **Protection mode** disabled on the ebusd addon's Info page.
+addon with its own **Protection mode** disabled (on the SSH addon's Info page, not on
+this one): only then can it use `docker` (this add-on).
+
+This is the way used on the test installation of this add-on. `docker ps` lists the
+containers; the one of this add-on is named `app_<prefix>_ebusd` (with the store address
+above, `app_09e0ce7c_ebusd`). Each `ebusctl` command then becomes
+`docker exec <container> ebusctl …`; if your SSH user is not root, put `sudo` in front, for
+example:
 
 ```bash
-docker exec -it $(docker ps --filter name=ebusd --format '{{.ID}}') /bin/bash
+sudo docker ps --format '{{.Names}}' | grep _ebusd
+sudo docker exec app_09e0ce7c_ebusd ebusctl info
 ```
 
 ### Via raw TCP
@@ -240,10 +307,17 @@ See [ebusd wiki: TCP client commands](https://github.com/john30/ebusd/wiki/3.1.-
 
 ## Custom message definitions
 
-ebusd fetches message definitions automatically from [ebus.github.io](https://ebus.github.io)
-when `--scanconfig` is set. **You don't need to configure anything for this to work.**
+Upstream ebusd fetches message definitions automatically from [ebus.github.io](https://ebus.github.io)
+when `--scanconfig` is set. **The ebusd of this add-on cannot** (no HTTPS): give it local
+definition files with `--configpath` (this add-on).
 
-To use local definition files instead, clone the
+For the Weishaupt definitions, download a release of
+[aghulas/ebusd-configuration](https://github.com/aghulas/ebusd-configuration/releases)
+(`weishaupt-ebusd-config-<version>.tar.gz`), unpack it into the app config folder and add
+`--scanconfig` and `--configpath=/config/weishaupt-ebusd-config-<version>`; the release's
+README gives the steps and a check (this add-on).
+
+To use the upstream definition files locally, clone the
 [ebus.github.io](https://github.com/eBUS/ebus.github.io) repo into the app config folder
 and add to `commandline_options`:
 
@@ -264,7 +338,7 @@ startup) and/or `<manufacturer>/*.csv` subdirectories (loaded per-device when
 > HTTP/HTTPS configpath URLs are skipped by this check.
 
 > **Note:** `/config/` inside the container maps to
-> `/addon_configs/2ad9b828_ebusd/` on the HA host — not to the HA `/config/` folder.
+> `/addon_configs/09e0ce7c_ebusd/` on the HA host — not to the HA `/config/` folder.
 > A common mistake is setting `--configpath=/config/ebusd` when the CSV files are
 > actually in `/config/` (i.e. the addon config root).
 
@@ -289,7 +363,7 @@ sqlite_retention_days: 10
 
 - `/share/…` can also be read by Home Assistant itself (e.g. the
   [SQL integration](https://www.home-assistant.io/integrations/sql/)) and other apps.
-  `/config/…` is the app config folder (`/addon_configs/2ad9b828_ebusd/` on the host).
+  `/config/…` is the app config folder (`/addon_configs/09e0ce7c_ebusd/` on the host).
 - Telegrams older than **SQLite telegram log retention** days are deleted every hour
   (default 10, `0` keeps everything). A telegram takes about 190 bytes, which is roughly
   50–170 MB per day depending on bus traffic. Both folders are part of HA backups.
@@ -341,7 +415,8 @@ restores it from ebusd's own address (`--address`, default `31`) when that gives
 
 ### Querying
 
-In the built-in terminal (**Open Web UI**):
+In the built-in terminal (**Open Web UI**), or prefixed with `docker exec <container>` over
+[SSH](#via-ssh-alternative) (this add-on):
 
 ```bash
 sqlite3 -box /share/ebusd/telegrams.db \
@@ -375,26 +450,12 @@ For a Home Assistant sensor, add the **SQL** integration with the database URL
 
 ## Testing upcoming versions
 
-Changes are collected on the `next` branch before they are released. You can install
-them as a separate test app next to your regular eBUSd:
+This add-on has no testing channel of its own (this add-on): the branch `weishaupt` follows
+the upstream releases of the app, and its versions are the only ones published.
 
-[![Add repository to Home Assistant](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2FLukasGrebe%2Fha-addons%23channel-next)
-
-or add `https://github.com/LukasGrebe/ha-addons#channel-next` as a repository in the app
-store (⋮ → Repositories), then install **eBUSd (next)**. Every change to `next` shows up
-as an update of it.
-
-- Stop your regular eBUSd first: an adapter can only be used by one app at a time.
-- The test app has its own configuration and its own config folder
-  `/addon_configs/963a193d_ebusd`. Copy `mqtt-hassio.cfg` or CSV files there if you use them.
-- With the same MQTT settings, both apps publish the same topics, so your HA entities keep working.
-- When done: uninstall the test app, start eBUSd again and remove the repository.
-
-Every pull request also gets a test app **eBUSd (PR #N)**: the PR has a comment with the
-link. Supervisor builds it on your device, so the first install takes a few minutes.
-
-Please report what you find in the pull request, or in an
-[issue](https://github.com/LukasGrebe/ha-addons/issues) for `next`.
+The upstream test apps (**eBUSd (next)** from `https://github.com/LukasGrebe/ha-addons#channel-next`,
+and **eBUSd (PR #N)** for pull requests) run the official ebusd, without the run-time
+checksum: do not write settings of Weishaupt controllers with them.
 
 ---
 

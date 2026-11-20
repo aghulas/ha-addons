@@ -2,9 +2,8 @@ name: eBUSd (Weishaupt CRC)
 version: "26.1.10-weishaupt.1"
 slug: ebusd
 description: >
-  Run ebusd — a daemon for communicating with eBUS devices (heating systems connected
-  to a 2-wire energy bus). Wrapper of john30/ebusd with the ebusd binary of
-  aghulas/ebusd (runtime CRC for Weishaupt WTC). USB and network eBUS adapters supported.
+  The eBUSd app with the ebusd build of aghulas/ebusd, which computes the run-time
+  checksum needed to write settings of Weishaupt controllers (WTC, Kromschröder WCM).
 url: https://github.com/aghulas/ebusd/tree/weishaupt
 arch:
   - aarch64
