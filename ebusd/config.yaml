@@ -1,5 +1,5 @@
 name: eBUSd (Weishaupt CRC)
-version: "26.1.10-weishaupt.1"
+version: "26.1.10-weishaupt.2"
 slug: ebusd
 description: >
   The eBUSd app with the ebusd build of aghulas/ebusd, which computes the run-time

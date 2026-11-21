@@ -34,9 +34,9 @@ COPY --from=upstream /usr/bin/ebusctl /usr/bin/ebusctl
 # ebusd itself comes from the static release of aghulas/ebusd (runtime CRC for Weishaupt),
 # checked against the pinned SHA-256 of the binary for the architecture being built.
 ARG BUILD_ARCH
-ARG EBUSD_RELEASE=v26.1-weishaupt.1
-ARG EBUSD_SHA256_aarch64=51c46e51e278535880f5524fd8b766df76f5c1410eef44addeb236366974fe1f
-ARG EBUSD_SHA256_amd64=7f51afc908bb3c156d6d47950a09685fe3b3e95c4e51ff321baa0daf56591e6e
+ARG EBUSD_RELEASE=v26.1-weishaupt.2
+ARG EBUSD_SHA256_aarch64=c7854b8aa5852451522b34ac253986c8ebbd74b23b27258d4d492f36e5aeec1d
+ARG EBUSD_SHA256_amd64=587ef8962e89f6a894b8e8c4c4962589ff3e2cc257b09df15d2cb5c01ce165c3
 RUN set -e; \
     case "${BUILD_ARCH}" in \
       aarch64) sha="${EBUSD_SHA256_aarch64}" ;; \
