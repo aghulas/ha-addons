@@ -8,7 +8,7 @@
 
 This is the eBUSd app of [LukasGrebe/ha-addons](https://github.com/LukasGrebe/ha-addons)
 with one change: its `ebusd` binary is not the one of john30/ebusd but the ebusd build
-[v26.1-weishaupt.1](https://github.com/aghulas/ebusd/releases/tag/v26.1-weishaupt.1) of
+[v26.1-weishaupt.2](https://github.com/aghulas/ebusd/releases/tag/v26.1-weishaupt.2) of
 [aghulas/ebusd](https://github.com/aghulas/ebusd), checked against its pinned SHA-256.
 `ebusctl`, the files under `/etc/ebusd/` and the app's own scripts are the upstream ones.
 There is no prebuilt image: Supervisor builds the add-on on your device, so the first

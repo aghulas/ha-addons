@@ -1,7 +1,7 @@
 # Home Assistant App: eBUSd (Weishaupt CRC)
 
 The upstream eBUSd app of [LukasGrebe/ha-addons](https://github.com/LukasGrebe/ha-addons) with
-the ebusd build [v26.1-weishaupt.1](https://github.com/aghulas/ebusd/releases/tag/v26.1-weishaupt.1)
+the ebusd build [v26.1-weishaupt.2](https://github.com/aghulas/ebusd/releases/tag/v26.1-weishaupt.2)
 of aghulas/ebusd, which computes the run-time checksum needed to write settings of Weishaupt
 controllers (WTC, Kromschröder WCM). Needed only for writing; it cannot load the online
 definitions, so give it local ones (`--configpath`). See the Documentation tab.
