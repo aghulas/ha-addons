@@ -46,7 +46,7 @@ COPY src /app/src
 COPY data /app/data
 RUN pip install --no-cache-dir .
 
-COPY docker/run.sh /run.sh
+COPY run.sh /run.sh
 RUN chmod +x /run.sh
 
 ENTRYPOINT ["/run.sh"]
