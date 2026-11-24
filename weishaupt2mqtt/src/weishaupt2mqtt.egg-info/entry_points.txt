@@ -1,0 +1,2 @@
+[console_scripts]
+weishaupt2mqtt = weishaupt2mqtt.__main__:main
