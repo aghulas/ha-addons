@@ -1,5 +1,5 @@
 name: Weishaupt2MQTT
-version: "0.1.0"
+version: "0.1.1"
 slug: weishaupt2mqtt
 description: All-in-one Weishaupt eBUS to functional MQTT bridge (bundles ebusd, definitions, and write guards)
 url: https://github.com/aghulas/weishaupt2mqtt
