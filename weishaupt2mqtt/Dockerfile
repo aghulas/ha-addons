@@ -1,4 +1,4 @@
-ARG BUILD_FROM=ghcr.io/home-assistant/base-debian:trixie
+ARG BUILD_FROM=python:3.11-slim-bookworm
 FROM ${BUILD_FROM}
 
 ENV LANG=C.UTF-8 \
@@ -11,24 +11,21 @@ RUN apt-get update \
       curl \
       jq \
       netcat-openbsd \
-      python3 \
-      python3-pip \
-      python3-venv \
  && rm -rf /var/lib/apt/lists/*
 
 # Pinned ebusd binary (aghulas/ebusd) verified by SHA-256
-ARG BUILD_ARCH
+ARG TARGETARCH
 ARG EBUSD_RELEASE=v26.1-weishaupt.2
 ARG EBUSD_SHA256_aarch64=c7854b8aa5852451522b34ac253986c8ebbd74b23b27258d4d492f36e5aeec1d
 ARG EBUSD_SHA256_amd64=587ef8962e89f6a894b8e8c4c4962589ff3e2cc257b09df15d2cb5c01ce165c3
 RUN set -e; \
-    case "${BUILD_ARCH}" in \
-      aarch64) sha="${EBUSD_SHA256_aarch64}" ;; \
-      amd64)   sha="${EBUSD_SHA256_amd64}" ;; \
-      *) echo "Unsupported architecture: ${BUILD_ARCH}"; exit 1 ;; \
+    case "${TARGETARCH:-$(dpkg --print-architecture)}" in \
+      arm64|aarch64) arch="aarch64"; sha="${EBUSD_SHA256_aarch64}" ;; \
+      amd64|x86_64)  arch="amd64";   sha="${EBUSD_SHA256_amd64}" ;; \
+      *) echo "Unsupported architecture: ${TARGETARCH}"; exit 1 ;; \
     esac; \
     curl -fsSL -o /usr/bin/ebusd \
-      "https://github.com/aghulas/ebusd/releases/download/${EBUSD_RELEASE}/ebusd-${BUILD_ARCH}"; \
+      "https://github.com/aghulas/ebusd/releases/download/${EBUSD_RELEASE}/ebusd-${arch}"; \
     echo "${sha}  /usr/bin/ebusd" | sha256sum -c -; \
     chmod 755 /usr/bin/ebusd
 
@@ -47,9 +44,10 @@ WORKDIR /app
 COPY pyproject.toml README.md /app/
 COPY src /app/src
 COPY data /app/data
-RUN pip3 install --break-system-packages --no-cache-dir .
+RUN mkdir -p /etc/weishaupt && cp /app/data/metadata.json /etc/weishaupt/metadata.json
+RUN pip install --no-cache-dir .
 
-COPY run.sh /run.sh
+COPY docker/run.sh /run.sh
 RUN chmod +x /run.sh
 
 ENTRYPOINT ["/run.sh"]
