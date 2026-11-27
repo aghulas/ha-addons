@@ -47,8 +47,11 @@ OS on a 64-bit ARM board with the Mosquitto broker add-on.
    `weishaupt/<circuit>/state` per device follows. The first full pass over all settings and
    programs took about a quarter of an hour on the test installation.
 
-`online` only says that the bridge is connected to the broker. To know that values are fresh, look
-at `"_updated"` in `weishaupt/ka/state`.
+`online` means values are being read: the bridge is connected to the broker, ebusd answers, it has
+a signal on the bus and the reading loop works. Otherwise `weishaupt/bridge/state` reads `offline`
+and `"health"` in `weishaupt/bridge/info` says why (`ebusd_unreachable`, `no_bus_signal`: look at
+the adapter, `reading_failed`, `reading_stalled`: look at the log) and since when. Settings and
+counters are read once an hour, live values every 15 to 60 s.
 
 ## Options
 
@@ -65,7 +68,7 @@ at `"_updated"` in `weishaupt/ka/state`.
 | `installer_writes_enabled` | `false` | Start value of the installer-level write switch (heating curve, limits, holiday dates, cascade…). Acts only with `writes_enabled` on; each command must also carry `"confirm": true`. Counts only until the first change at run time (below). |
 | `allow_stock_ebusd` | `false` | Only with `ebusd_external` and an official ebusd. No effect with the bundled one. |
 | `max_writes_per_hour` | `30` | Hourly write budget, 1 to 200. |
-| `clock_sync_enabled` | `false` | **Leave off in 0.1.3**: switched on, the bridge stops publishing new values after its first pass. |
+| `clock_sync_enabled` | `false` | `true`: every 30 minutes (first time 30 minutes after the start) the bridge sets the date and time of the whole installation from the clock of Home Assistant's machine, at second 00 of a minute. It is a write: it also needs `writes_enabled`, and counts in the hourly budget. Sending was not checked on a bus in 0.1.4: watch the time on a room unit after the first one. Each attempt is on `weishaupt/bridge/journal` (`"kind": "clock"`). **Up to 0.1.3 this option stopped all reading: update before switching it on.** |
 | `log_level` | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR`. |
 
 The two write switches can be changed while the add-on runs (the **Writes** switch of the
