@@ -19,10 +19,10 @@ OS on a 64-bit ARM board with the Mosquitto broker add-on.
 - An eBUS adapter reachable **over the network**. The add-on gets no serial device.
 - The **Mosquitto broker** add-on and the MQTT integration.
 - No other ebusd on the same adapter: stop the eBUSd add-on if it uses it.
-- If you want the integration ha-weishaupt: version 1.4.1 creates its entry only against an ebusd
-  add-on. Make that entry **before** you replace the ebusd add-on by this one, then switch it
-  (*⋮ → Reconfigure → Weishaupt2MQTT (MQTT bridge)*). The manual, *Use it from Home Assistant*,
-  gives the order.
+- If you want the integration ha-weishaupt: take its version 1.5.0 or later, which is added once
+  this add-on runs (*Add integration → Weishaupt → Weishaupt2MQTT (MQTT bridge)*). Earlier
+  versions cannot create their entry with this add-on alone. An existing entry is switched from
+  its *⋮ → Reconfigure* menu.
 
 ## Set up
 
