@@ -2,7 +2,7 @@
 
 This branch (`weishaupt`) of a fork of [LukasGrebe/ha-addons](https://github.com/LukasGrebe/ha-addons)
 publishes one add-on, **eBUSd (Weishaupt CRC)**: the upstream eBUSd add-on with the ebusd build
-[aghulas/ebusd v26.1-weishaupt.1](https://github.com/aghulas/ebusd/releases/tag/v26.1-weishaupt.1),
+[aghulas/ebusd v26.1-weishaupt.2](https://github.com/aghulas/ebusd/releases/tag/v26.1-weishaupt.2),
 which computes the checksum that Weishaupt / Kromschröder WCM controllers expect in a register
 write (john30/ebusd#1825, not merged yet). Everything else is the upstream add-on, with its
 documentation ([`ebusd/DOCS.md`](ebusd/DOCS.md)).
@@ -21,10 +21,18 @@ stock add-on is enough.
 4. Configure it as the stock add-on (adapter, options). Its configuration folder is its own,
    `/addon_configs/<prefix>_ebusd/`: copy your definitions and `mqtt-hassio.cfg` there.
 5. Check which ebusd runs: `ebusctl info` inside the add-on (SSH add-on, `docker exec <container>
-   ebusctl info`); the first line reads `version: ebusd 26.1.p20261029`. The definitions' notice
+   ebusctl info`); the first line reads `version: ebusd 26.1.p20261120`. The definitions' notice
    gives a check that sends nothing to the bus.
 
 Unofficial, not affiliated with Weishaupt or Kromschröder. Updates follow upstream releases.
+
+## Weishaupt2MQTT
+
+The same repository holds a second add-on, **Weishaupt2MQTT**: ebusd, the Weishaupt definitions
+and the MQTT bridge [weishaupt2mqtt](https://github.com/aghulas/weishaupt2mqtt) in one, for use
+with the integration [ha-weishaupt](https://github.com/aghulas/ha-weishaupt) over MQTT or with any
+MQTT client. Install it from the same store entry; its documentation is
+[`weishaupt2mqtt/DOCS.md`](weishaupt2mqtt/DOCS.md). Run one of the two on an adapter, not both.
 
 
 ## [ebusd](https://github.com/LukasGrebe/ha-addons/tree/main/ebusd) 
