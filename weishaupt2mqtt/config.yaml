@@ -15,7 +15,7 @@ map:
   - data:rw
 options:
   ebusd_external: false
-  ebus_device: "ens:10.77.20.230:9999"
+  ebus_device: ""
   ebusd_address: "31"
   ebusd_host: "127.0.0.1"
   ebusd_port: 8888
